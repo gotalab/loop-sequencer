@@ -771,32 +771,51 @@ Guidelines:
                                             tracks: {
                                                 type: "array",
                                                 items: {
-                                                    type: "object",
-                                                    properties: {
-                                                        id: { type: "string" },
-                                                        type: { type: "string" },
-                                                        sound: { type: "string" },
-                                                        synth: { type: "string" },
-                                                        steps: {
-                                                            type: "array",
-                                                            items: { type: "number" }
-                                                        },
-                                                        notes: {
-                                                            type: "array",
-                                                            items: {
-                                                                type: "object",
-                                                                properties: {
-                                                                    step: { type: "number" },
-                                                                    pitch: { type: "string" },
-                                                                    len: { type: "string" }
+                                                    oneOf: [
+                                                        {
+                                                            type: "object",
+                                                            properties: {
+                                                                id: { type: "string" },
+                                                                type: {
+                                                                    type: "string",
+                                                                    const: "drum"
                                                                 },
-                                                                required: ["step", "pitch", "len"],
-                                                                additionalProperties: false
-                                                            }
+                                                                sound: { type: "string" },
+                                                                steps: {
+                                                                    type: "array",
+                                                                    items: { type: "number" }
+                                                                }
+                                                            },
+                                                            required: ["id", "type", "sound", "steps"],
+                                                            additionalProperties: false
+                                                        },
+                                                        {
+                                                            type: "object",
+                                                            properties: {
+                                                                id: { type: "string" },
+                                                                type: {
+                                                                    type: "string",
+                                                                    const: "mono"
+                                                                },
+                                                                synth: { type: "string" },
+                                                                notes: {
+                                                                    type: "array",
+                                                                    items: {
+                                                                        type: "object",
+                                                                        properties: {
+                                                                            step: { type: "number" },
+                                                                            pitch: { type: "string" },
+                                                                            len: { type: "string" }
+                                                                        },
+                                                                        required: ["step", "pitch", "len"],
+                                                                        additionalProperties: false
+                                                                    }
+                                                                }
+                                                            },
+                                                            required: ["id", "type", "synth", "notes"],
+                                                            additionalProperties: false
                                                         }
-                                                    },
-                                                    required: ["id", "type"],
-                                                    additionalProperties: false
+                                                    ]
                                                 }
                                             }
                                         },

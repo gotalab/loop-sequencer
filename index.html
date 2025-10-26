@@ -342,7 +342,7 @@
 
                 <div class="control-group">
                     <label>Swing</label>
-                    <input type="range" id="swing" min="0.50" max="0.62" step="0.01" value="0.55">
+                    <input type="range" id="swing" min="0" max="0.70" step="0.01" value="0.55">
                     <span class="value-display" id="swing-value">0.55</span>
                 </div>
 
@@ -405,6 +405,8 @@
                             <option value="sawtooth">Sawtooth</option>
                             <option value="sine">Sine</option>
                             <option value="triangle">Triangle</option>
+                            <option value="fm">FM (Reese)</option>
+                            <option value="filtered">Filtered</option>
                         </select>
                     </div>
                     <div class="steps" id="bass-steps"></div>
@@ -418,6 +420,9 @@
                         <select id="chord-sound">
                             <option value="pad" selected>Pad</option>
                             <option value="pluck">Pluck</option>
+                            <option value="organ">Organ</option>
+                            <option value="ep">EP/Rhodes</option>
+                            <option value="strings">Strings</option>
                         </select>
                     </div>
                     <div class="steps" id="chord-steps"></div>
@@ -495,11 +500,11 @@
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "909", steps: [1, 5, 9, 13] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [5, 13] },
                     { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [3, 7, 11, 15] },
-                    { id: "bass", type: "mono", synth: "square", soundType: "square", notes: [
+                    { id: "bass", type: "mono", synth: "square", soundType: "filtered", notes: [
                         { step: 1, pitch: "C2", len: "8n" },
                         { step: 9, pitch: "C2", len: "8n" }
                     ]},
-                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [
+                    { id: "chord", type: "poly", synth: "pad", soundType: "organ", chords: [
                         { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "2n" }
                     ]}
                 ]
@@ -511,10 +516,10 @@
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [1, 11] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "pink", steps: [5, 13] },
                     { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [2, 4, 6, 8, 10, 12, 14, 16] },
-                    { id: "bass", type: "mono", synth: "square", soundType: "sawtooth", notes: [
+                    { id: "bass", type: "mono", synth: "square", soundType: "square", notes: [
                         { step: 1, pitch: "C2", len: "4n" }
                     ]},
-                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [
+                    { id: "chord", type: "poly", synth: "pad", soundType: "ep", chords: [
                         { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "1m" }
                     ]}
                 ]
@@ -539,7 +544,7 @@
             },
             techno: {
                 version: "pattern-v1",
-                meta: { style: "techno", bpm: 130, swing: 0.50, scale: "C minor" },
+                meta: { style: "techno", bpm: 130, swing: 0, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "909", steps: [1, 5, 9, 13] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [] },
@@ -552,15 +557,15 @@
             },
             dnb: {
                 version: "pattern-v1",
-                meta: { style: "dnb", bpm: 174, swing: 0.50, scale: "C minor" },
+                meta: { style: "dnb", bpm: 174, swing: 0, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "909", steps: [1, 9] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [5, 13] },
                     { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [3, 7, 11, 15] },
-                    { id: "bass", type: "mono", synth: "square", soundType: "sine", notes: [
+                    { id: "bass", type: "mono", synth: "square", soundType: "fm", notes: [
                         { step: 1, pitch: "C2", len: "4n" }
                     ]},
-                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [
+                    { id: "chord", type: "poly", synth: "pad", soundType: "strings", chords: [
                         { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "1m" }
                     ]}
                 ]
@@ -575,14 +580,14 @@
                     { id: "bass", type: "mono", synth: "square", soundType: "triangle", notes: [
                         { step: 1, pitch: "C2", len: "4n" }
                     ]},
-                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [
+                    { id: "chord", type: "poly", synth: "pad", soundType: "ep", chords: [
                         { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "1m" }
                     ]}
                 ]
             },
             ambient: {
                 version: "pattern-v1",
-                meta: { style: "ambient", bpm: 60, swing: 0.50, scale: "C minor" },
+                meta: { style: "ambient", bpm: 60, swing: 0, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [] },
@@ -590,14 +595,14 @@
                     { id: "bass", type: "mono", synth: "square", soundType: "sine", notes: [
                         { step: 1, pitch: "C2", len: "1m" }
                     ]},
-                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [
+                    { id: "chord", type: "poly", synth: "pad", soundType: "strings", chords: [
                         { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "1m" }
                     ]}
                 ]
             },
             dubstep: {
                 version: "pattern-v1",
-                meta: { style: "dubstep", bpm: 140, swing: 0.50, scale: "C minor" },
+                meta: { style: "dubstep", bpm: 140, swing: 0, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "808", steps: [1, 9] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "clap", steps: [5, 13] },
@@ -993,19 +998,69 @@
                     "triangle": new Tone.MonoSynth({
                         oscillator: { type: "triangle" },
                         envelope: { attack: 0.005, decay: 0.15, sustain: 0.35, release: 0.15 }
+                    }).toDestination(),
+                    "fm": new Tone.FMSynth({
+                        harmonicity: 3,
+                        modulationIndex: 10,
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.01, decay: 0.2, sustain: 0.3, release: 0.2 },
+                        modulation: { type: "square" },
+                        modulationEnvelope: { attack: 0.01, decay: 0.5, sustain: 0.2, release: 0.1 }
+                    }).toDestination(),
+                    "filtered": new Tone.MonoSynth({
+                        oscillator: { type: "sawtooth" },
+                        filter: { Q: 6, type: "lowpass", rolloff: -24 },
+                        envelope: { attack: 0.01, decay: 0.2, sustain: 0.4, release: 0.2 },
+                        filterEnvelope: { attack: 0.01, decay: 0.3, sustain: 0.5, release: 0.8, baseFrequency: 200, octaves: 4 }
                     }).toDestination()
                 }
             };
 
             // Chord synthesizers
             soundLibrary.chord = {
-                "pad": new Tone.PolySynth(Tone.Synth, {
-                    oscillator: { type: "sine" },
-                    envelope: { attack: 0.3, decay: 0.5, sustain: 0.7, release: 1.5 }
+                "pad": new Tone.PolySynth({
+                    voice: Tone.Synth,
+                    options: {
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.4, decay: 0.3, sustain: 0.8, release: 1.2 }
+                    },
+                    volume: -8
                 }).toDestination(),
-                "pluck": new Tone.PolySynth(Tone.Synth, {
-                    oscillator: { type: "triangle" },
-                    envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.3 }
+                "pluck": new Tone.PolySynth({
+                    voice: Tone.Synth,
+                    options: {
+                        oscillator: { type: "triangle" },
+                        envelope: { attack: 0.005, decay: 0.2, sustain: 0.1, release: 0.4 }
+                    },
+                    volume: -6
+                }).toDestination(),
+                "organ": new Tone.PolySynth({
+                    voice: Tone.Synth,
+                    options: {
+                        oscillator: { type: "sine4" },
+                        envelope: { attack: 0.02, decay: 0.1, sustain: 0.9, release: 0.2 }
+                    },
+                    volume: -10
+                }).toDestination(),
+                "ep": new Tone.PolySynth({
+                    voice: Tone.FMSynth,
+                    options: {
+                        harmonicity: 1,
+                        modulationIndex: 2,
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.01, decay: 0.5, sustain: 0.3, release: 1.0 },
+                        modulation: { type: "triangle" },
+                        modulationEnvelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 }
+                    },
+                    volume: -8
+                }).toDestination(),
+                "strings": new Tone.PolySynth({
+                    voice: Tone.Synth,
+                    options: {
+                        oscillator: { type: "sawtooth" },
+                        envelope: { attack: 0.5, decay: 0.3, sustain: 0.9, release: 1.5 }
+                    },
+                    volume: -12
                 }).toDestination()
             };
 
@@ -1194,19 +1249,35 @@ Available Tracks (use as needed):
 1. kick: type="drum", soundType="808"/"909"/"acoustic", steps=[...]
 2. snare: type="drum", soundType="white"/"pink"/"clap", steps=[...]
 3. hat: type="drum", soundType="closed"/"open", steps=[...]
-4. bass: type="mono", soundType="square"/"sawtooth"/"sine"/"triangle", notes=[{step, pitch, len}]
-5. chord: type="poly", soundType="pad"/"pluck", chords=[{step, name, notes, len}]
+4. bass: type="mono", soundType="square"/"sawtooth"/"sine"/"triangle"/"fm"/"filtered", notes=[{step, pitch, len}]
+5. chord: type="poly", soundType="pad"/"pluck"/"organ"/"ep"/"strings", chords=[{step, name, notes, len}]
 
-Genre-specific suggestions:
-- House: 909 kick on every beat, white snare, closed hats, sawtooth bass, pad chords
-- Trap: 808 kick (sparse), clap snare, rapid open hats, sine bass, pluck chords
-- Boom-bap: Acoustic kick, pink snare on 2&4, steady closed hats, square bass
-- Techno: Punchy 909 kick, minimal snare, driving closed hats, sine bass, sparse chords
-- Drum & Bass: Fast (170+ BPM), complex breaks, reese bass, atmospheric pads
-- Lo-fi: Sparse acoustic kick, soft pink snare, subtle hats, warm triangle bass, jazzy chords
-- Ambient: Minimal/no drums, focus on lush pad chords and subtle bass
-- Dubstep: Heavy 808 kick (half-time), aggressive clap, minimal hats, deep sine bass
-- Breakbeat: Syncopated breaks, varied snare patterns, complex hat rhythms
+Sound Type Guide:
+Bass:
+- square: Aggressive, sharp (Electro, Techno)
+- sawtooth: Fat, rich (House, Disco)
+- sine: Sub bass, deep (Dubstep, Trap)
+- triangle: Warm, soft (Lo-fi)
+- fm: Reese bass, complex (Drum & Bass, Neurofunk)
+- filtered: Funky, dynamic (Disco, Funk)
+
+Chord:
+- pad: Lush, sustained (Ambient, Trance)
+- pluck: Rhythmic, percussive (Trap, EDM)
+- organ: Hammond-style (House, Gospel)
+- ep: Rhodes/EP, vintage (Lo-fi, Jazz, Soul)
+- strings: Orchestral, cinematic (Ambient, Classical)
+
+Genre-specific sound suggestions:
+- House: 909 kick, white snare, closed hats, sawtooth/filtered bass, organ chords
+- Trap: 808 kick, clap snare, open hats, sine bass, pluck chords
+- Boom-bap: Acoustic kick, pink snare, closed hats, square bass, ep chords
+- Techno: 909 kick, minimal snare, closed hats, sine/fm bass, minimal pad
+- Drum & Bass: 909 kick, white snare, closed hats, fm (reese) bass, strings/pad
+- Lo-fi: Acoustic kick, pink snare, closed hats, triangle bass, ep chords
+- Ambient: Minimal drums, sine bass, pad/strings chords (focus on harmony)
+- Dubstep: 808 kick, clap, minimal hats, sine bass (deep), pluck/pad
+- Breakbeat: Acoustic kick, pink snare, complex hats, filtered bass, organ/ep
 
 Chord vocabulary (any key):
 - C minor: Cm, Fm, G7, Ab, Eb, Bb, Ddim

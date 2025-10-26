@@ -729,36 +729,21 @@
                         body: JSON.stringify({
                             contents: [{
                                 parts: [{
-                                    text: `You are a music arranger. Generate a 16-step × 4-track (Kick/Snare/Hat/Bass) one-bar loop pattern in JSON format strictly following the "pattern-v1" schema.
+                                    text: `Create a ${style} drum pattern at ${bpm} BPM with ${swing} swing.
 
-Requirements:
-- style: ${style}
-- bpm: ${bpm}
-- swing: ${swing}
-- scale: C minor
-- steps: 1..16 (don't overcrowd)
-- bass notes must be within the key
-- probability: 0..1 (optional)
-- rolls: "1/32x3" format (optional)
+Output a pattern-v1 JSON with:
+- 4 tracks: kick, snare, hat (drum type with steps 1-16), bass (mono type with notes)
+- Don't overcrowd steps
+- Bass notes in C minor scale (C, D, Eb, F, G, Ab, Bb)
+- Use pitch notation like "C2", "Eb2", "G2"
+- Note lengths: "8n", "16n", "4n"
 
-Return ONLY the JSON object, no explanations or code blocks.
-
-Schema example:
-{
-  "version": "pattern-v1",
-  "meta": { "style": "${style}", "bpm": ${bpm}, "swing": ${swing}, "scale": "C minor" },
-  "tracks": [
-    { "id": "kick", "type": "drum", "sound": "kick-01", "steps": [1,5,9,13] },
-    { "id": "snare", "type": "drum", "sound": "snare-01", "steps": [5,13] },
-    { "id": "hat", "type": "drum", "sound": "hat-closed-01", "steps": [3,7,11,15] },
-    { "id": "bass", "type": "mono", "synth": "square", "notes": [{"step":1,"pitch":"C2","len":"8n"}] }
-  ]
-}`
+Return valid JSON only.`
                                 }]
                             }],
                             generationConfig: {
                                 temperature: 1.0,
-                                maxOutputTokens: 2048,
+                                maxOutputTokens: 4096,
                                 responseMimeType: "application/json",
                                 responseSchema: {
                                     type: "object",
@@ -832,7 +817,19 @@ Schema example:
                 }
 
                 const jsonText = data.candidates[0].content.parts[0].text;
-                const pattern = JSON.parse(jsonText);
+
+                // Debug: log raw JSON text
+                console.log("Raw JSON response:", jsonText);
+                console.log("JSON length:", jsonText.length);
+
+                let pattern;
+                try {
+                    pattern = JSON.parse(jsonText);
+                } catch (parseError) {
+                    console.error("JSON parse failed:", parseError);
+                    console.error("Partial JSON:", jsonText.substring(0, 500) + "...");
+                    throw new Error(`JSON解析エラー: ${parseError.message}. コンソールログを確認してください。`);
+                }
 
                 // Validate pattern
                 if (pattern.version !== "pattern-v1" || !pattern.tracks) {

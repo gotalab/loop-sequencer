@@ -2,11 +2,12 @@
 
 16ステップ×4トラックの1小節ループを最短で作って遊べる、Webベースの音楽制作ツールです。
 
-**Gemini 2.5 Pro** による自動パターン生成と、**Tone.js** による高品質なWeb Audio再生を搭載。
+**OpenAI GPT-5-mini** による自動パターン生成と、**Tone.js** シンセサイザーによる高品質なWeb Audio再生を搭載。
 
 ## ✨ 特徴
 
-- **AIパターン生成**: Gemini 2.5 ProでDance Music風のパターンを自動生成
+- **AIパターン生成**: OpenAI GPT-5-mini（2025年8月リリース）でDance Music風のパターンを自動生成
+- **シンセサイザー音源**: Tone.jsシンセサイザーによる高品質なドラム＆ベースサウンド（外部サンプル不要）
 - **リアルタイム再生**: Tone.jsによる高精度なシーケンス再生
 - **WAV録音**: ブラウザで8秒録音→即ダウンロード
 - **プリセット**: House / Boom Bap / Trap の3スタイル搭載
@@ -38,11 +39,13 @@ python3 -m http.server 8000
 open http://localhost:8000
 ```
 
-### 3. Gemini APIキーの取得（オプション）
+### 3. OpenAI APIキーの取得（オプション）
 
-AIパターン生成を利用する場合は、[Google AI Studio](https://aistudio.google.com/app/apikey) でAPIキーを取得してください。
+AIパターン生成を利用する場合は、[OpenAI Platform](https://platform.openai.com/api-keys) でAPIキーを取得してください。
 
 > ⚠️ **注意**: このアプリはプロトタイプ用途です。APIキーは保存されません（メモリのみ）。
+>
+> 💰 **料金**: GPT-5-mini は $0.25/1M入力トークン、$2/1M出力トークンです。通常のパターン生成は1回あたり数セント程度です。
 
 ## 📖 使い方
 
@@ -53,10 +56,10 @@ AIパターン生成を利用する場合は、[Google AI Studio](https://aistud
 3. **再生**: ▶ボタンで再生、■ボタンで停止
 4. **手動編集**: グリッド上のステップをクリックしてON/OFF
 
-### AI生成（Gemini）
+### AI生成（GPT-5-mini）
 
-1. サイドバーにGemini APIキーを入力
-2. 「✨ Geminiで生成」ボタンをクリック
+1. サイドバーにOpenAI APIキーを入力
+2. 「✨ GPT-5-miniで生成」ボタンをクリック
 3. 約1-2秒でパターンが生成され、自動的に適用されます
 
 ### 録音
@@ -113,7 +116,11 @@ AIパターン生成を利用する場合は、[Google AI Studio](https://aistud
 ## 🛠 技術スタック
 
 - **Tone.js** (v14.8.49) - Web Audio フレームワーク
-- **Gemini 2.5 Pro** - AIパターン生成
+  - MembraneSynth（キック）
+  - NoiseSynth（スネア）
+  - MetalSynth（ハイハット）
+  - MonoSynth（ベース）
+- **OpenAI GPT-5-mini** - AIパターン生成（Structured Outputs使用）
 - **Vanilla JavaScript** - フレームワークなし
 - **GitHub Pages** - 静的ホスティング
 
@@ -121,14 +128,13 @@ AIパターン生成を利用する場合は、[Google AI Studio](https://aistud
 
 ```
 /
-├── index.html          # メインアプリケーション（単一ファイル）
-├── samples/            # サンプル音源
-│   ├── kick-01.wav     # （ユーザーが配置）
-│   ├── snare-01.wav    # （ユーザーが配置）
-│   ├── hat-closed-01.wav # （ユーザーが配置）
-│   └── README.md       # 音源の入手方法
+├── index.html          # メインアプリケーション（単一ファイル、すべてのロジックを含む）
+├── samples/            # （オプション）外部サンプル音源用ディレクトリ
+│   └── README.md       # 音源の入手方法（シンセサイザーがデフォルト）
 └── README.md           # このファイル
 ```
+
+**注意**: 現在のバージョンはTone.jsシンセサイザーを使用しているため、`samples/`ディレクトリの音源ファイルは不要です。
 
 ## 🔐 セキュリティとプライバシー
 
@@ -139,11 +145,12 @@ AIパターン生成を利用する場合は、[Google AI Studio](https://aistud
 ## 📋 受け入れ基準
 
 - [x] サイドバーでキー未入力でも起動可能（LLMなしモード）
-- [x] キー入力→[Geminiで生成]実行でpattern-v1 JSONを受け取り、1.5s程度で再生
+- [x] キー入力→[GPT-5-miniで生成]実行でpattern-v1 JSONを受け取り、1.5s程度で再生
 - [x] ▶再生 / ■停止 / ●録音(8s) が動作し、WAVが保存できる
 - [x] プリセット3種が選択できる
 - [x] JSON貼付→即反映、?p= 共有で復元できる
 - [x] リロードでAPIキーが空に戻る（保存していない）
+- [x] Tone.jsシンセサイザーで外部音源なしで動作する
 
 ## 🤝 コントリビューション
 
@@ -161,12 +168,12 @@ MIT License
 ## 🙏 謝辞
 
 - [Tone.js](https://tonejs.github.io/) - 素晴らしいWeb Audioフレームワーク
-- [Google Gemini](https://ai.google.dev/) - 強力な生成AI
-- フリーサンプル提供者の皆様
+- [OpenAI](https://openai.com/) - GPT-5-miniとStructured Outputs API
 
 ## 🔗 関連リンク
 
-- [Gemini API ドキュメント](https://ai.google.dev/docs)
+- [OpenAI Platform Documentation](https://platform.openai.com/docs)
+- [OpenAI Structured Outputs Guide](https://platform.openai.com/docs/guides/structured-outputs)
 - [Tone.js ドキュメント](https://tonejs.github.io/docs/)
 - [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 

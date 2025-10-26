@@ -284,7 +284,7 @@
 <body>
     <header>
         <h1>🎵 1分で曲作り - ループ・シーケンサー</h1>
-        <div class="about">Gemini 2.5 Flash × Tone.js</div>
+        <div class="about">Gemini 2.5 Pro × Tone.js</div>
     </header>
 
     <div class="container">
@@ -712,14 +712,13 @@
             const bpm = document.getElementById("bpm").value;
             const swing = document.getElementById("swing").value;
 
-            setStatus("Gemini 2.5 Flashでパターン生成中...", "");
+            setStatus("Gemini 2.5 Proでパターン生成中...", "");
             document.getElementById("generate-btn").disabled = true;
 
             try {
-                // Use Gemini 2.5 Flash (stable, fast, cost-efficient)
-                // Alternative: gemini-2.5-pro (more powerful but slower)
+                // Use Gemini 2.5 Pro (most powerful, best quality)
                 const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent`,
                     {
                         method: "POST",
                         headers: {
@@ -729,21 +728,57 @@
                         body: JSON.stringify({
                             contents: [{
                                 parts: [{
-                                    text: `Create a ${style} drum pattern at ${bpm} BPM with ${swing} swing.
+                                    text: `Generate a ${style} beat pattern. Return ONLY valid JSON matching this exact structure:
 
-Output a pattern-v1 JSON with:
-- 4 tracks: kick, snare, hat (drum type with steps 1-16), bass (mono type with notes)
-- Don't overcrowd steps
-- Bass notes in C minor scale (C, D, Eb, F, G, Ab, Bb)
-- Use pitch notation like "C2", "Eb2", "G2"
-- Note lengths: "8n", "16n", "4n"
+{
+  "version": "pattern-v1",
+  "meta": {
+    "style": "${style}",
+    "bpm": ${bpm},
+    "swing": ${swing},
+    "scale": "C minor"
+  },
+  "tracks": [
+    {
+      "id": "kick",
+      "type": "drum",
+      "sound": "kick-01",
+      "steps": [1, 5, 9, 13]
+    },
+    {
+      "id": "snare",
+      "type": "drum",
+      "sound": "snare-01",
+      "steps": [5, 13]
+    },
+    {
+      "id": "hat",
+      "type": "drum",
+      "sound": "hat-closed-01",
+      "steps": [1, 3, 5, 7, 9, 11, 13, 15]
+    },
+    {
+      "id": "bass",
+      "type": "mono",
+      "synth": "square",
+      "notes": [
+        {"step": 1, "pitch": "C2", "len": "8n"},
+        {"step": 9, "pitch": "Eb2", "len": "8n"}
+      ]
+    }
+  ]
+}
 
-Return valid JSON only.`
+Rules:
+- steps: 1-16 only, don't use all 16
+- bass pitch: C2, D2, Eb2, F2, G2, Ab2, Bb2 only
+- bass len: "8n", "16n", or "4n" only
+- Keep it simple and groovy for ${style} style`
                                 }]
                             }],
                             generationConfig: {
-                                temperature: 1.0,
-                                maxOutputTokens: 4096,
+                                temperature: 0.7,
+                                maxOutputTokens: 8192,
                                 responseMimeType: "application/json",
                                 responseSchema: {
                                     type: "object",

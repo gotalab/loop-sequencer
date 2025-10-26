@@ -536,6 +536,92 @@
                         { step: 9, name: "Ab", notes: ["Ab3", "C4", "Eb4"], len: "4n" }
                     ]}
                 ]
+            },
+            techno: {
+                version: "pattern-v1",
+                meta: { style: "techno", bpm: 130, swing: 0.50, scale: "C minor" },
+                tracks: [
+                    { id: "kick", type: "drum", sound: "kick-01", soundType: "909", steps: [1, 5, 9, 13] },
+                    { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [] },
+                    { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [1, 3, 5, 7, 9, 11, 13, 15] },
+                    { id: "bass", type: "mono", synth: "square", soundType: "sine", notes: [
+                        { step: 1, pitch: "C2", len: "8n" }
+                    ]},
+                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [] }
+                ]
+            },
+            dnb: {
+                version: "pattern-v1",
+                meta: { style: "dnb", bpm: 174, swing: 0.50, scale: "C minor" },
+                tracks: [
+                    { id: "kick", type: "drum", sound: "kick-01", soundType: "909", steps: [1, 9] },
+                    { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [5, 13] },
+                    { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [3, 7, 11, 15] },
+                    { id: "bass", type: "mono", synth: "square", soundType: "sine", notes: [
+                        { step: 1, pitch: "C2", len: "4n" }
+                    ]},
+                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [
+                        { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "1m" }
+                    ]}
+                ]
+            },
+            lofi: {
+                version: "pattern-v1",
+                meta: { style: "lofi", bpm: 75, swing: 0.60, scale: "C minor" },
+                tracks: [
+                    { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [1, 13] },
+                    { id: "snare", type: "drum", sound: "snare-01", soundType: "pink", steps: [5] },
+                    { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [3, 7, 11, 15] },
+                    { id: "bass", type: "mono", synth: "square", soundType: "triangle", notes: [
+                        { step: 1, pitch: "C2", len: "4n" }
+                    ]},
+                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [
+                        { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "1m" }
+                    ]}
+                ]
+            },
+            ambient: {
+                version: "pattern-v1",
+                meta: { style: "ambient", bpm: 60, swing: 0.50, scale: "C minor" },
+                tracks: [
+                    { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [] },
+                    { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [] },
+                    { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [] },
+                    { id: "bass", type: "mono", synth: "square", soundType: "sine", notes: [
+                        { step: 1, pitch: "C2", len: "1m" }
+                    ]},
+                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [
+                        { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "1m" }
+                    ]}
+                ]
+            },
+            dubstep: {
+                version: "pattern-v1",
+                meta: { style: "dubstep", bpm: 140, swing: 0.50, scale: "C minor" },
+                tracks: [
+                    { id: "kick", type: "drum", sound: "kick-01", soundType: "808", steps: [1, 9] },
+                    { id: "snare", type: "drum", sound: "snare-01", soundType: "clap", steps: [5, 13] },
+                    { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "open", steps: [] },
+                    { id: "bass", type: "mono", synth: "square", soundType: "sine", notes: [
+                        { step: 1, pitch: "C1", len: "4n" },
+                        { step: 5, pitch: "C2", len: "16n" }
+                    ]},
+                    { id: "chord", type: "poly", synth: "pluck", soundType: "pluck", chords: [] }
+                ]
+            },
+            breakbeat: {
+                version: "pattern-v1",
+                meta: { style: "breakbeat", bpm: 135, swing: 0.55, scale: "C minor" },
+                tracks: [
+                    { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [1, 7, 11] },
+                    { id: "snare", type: "drum", sound: "snare-01", soundType: "pink", steps: [5, 13, 15] },
+                    { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [3, 6, 7, 10, 11, 14, 15] },
+                    { id: "bass", type: "mono", synth: "square", soundType: "sawtooth", notes: [
+                        { step: 1, pitch: "C2", len: "8n" },
+                        { step: 7, pitch: "Eb2", len: "16n" }
+                    ]},
+                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [] }
+                ]
             }
         };
 

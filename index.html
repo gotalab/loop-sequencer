@@ -584,23 +584,36 @@
             await Tone.start();
             console.log("Audio initialized");
 
-            // Initialize players (with fallback to synth if samples not available)
-            players.kick = new Tone.Player("samples/kick-01.wav").toDestination();
-            players.snare = new Tone.Player("samples/snare-01.wav").toDestination();
-            players.hat = new Tone.Player("samples/hat-closed-01.wav").toDestination();
+            // Use synthesizers for drum sounds (no external samples needed)
+            // Kick drum - low frequency membrane synth
+            players.kick = new Tone.MembraneSynth({
+                pitchDecay: 0.05,
+                octaves: 10,
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4 }
+            }).toDestination();
+
+            // Snare drum - noise synth
+            players.snare = new Tone.NoiseSynth({
+                noise: { type: "white" },
+                envelope: { attack: 0.001, decay: 0.2, sustain: 0 }
+            }).toDestination();
+
+            // Hi-hat - metallic synth
+            players.hat = new Tone.MetalSynth({
+                frequency: 200,
+                envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
+                harmonicity: 5.1,
+                modulationIndex: 32,
+                resonance: 4000,
+                octaves: 1.5
+            }).toDestination();
 
             // Bass synth
             synth = new Tone.MonoSynth({
                 oscillator: { type: "square" },
                 envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 0.1 }
             }).toDestination();
-
-            // Error handling for missing samples
-            Object.keys(players).forEach(key => {
-                players[key].onerror = (err) => {
-                    console.warn(`Sample ${key} not loaded, using synth fallback`);
-                };
-            });
         }
 
         function play() {
@@ -622,8 +635,15 @@
                     // Play drums
                     currentPattern.tracks.forEach(track => {
                         if (track.type === "drum" && track.steps && track.steps.includes(step)) {
-                            if (players[track.id] && players[track.id].loaded) {
-                                players[track.id].start(time);
+                            if (players[track.id]) {
+                                // Trigger synth-based drum sounds
+                                if (track.id === "kick") {
+                                    players[track.id].triggerAttackRelease("C1", "8n", time);
+                                } else if (track.id === "snare") {
+                                    players[track.id].triggerAttackRelease("16n", time);
+                                } else if (track.id === "hat") {
+                                    players[track.id].triggerAttack(time);
+                                }
                             }
                         } else if (track.type === "mono" && track.notes) {
                             const note = track.notes.find(n => n.step === step);

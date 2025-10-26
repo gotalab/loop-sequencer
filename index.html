@@ -736,13 +736,21 @@
                                     role: "user",
                                     content: `Create a unique ${style} beat pattern at ${bpm} BPM with ${swing} swing.
 
-Be creative and vary the rhythm! Make sure each generation is different.
+IMPORTANT: All tracks must include ALL fields (id, type, sound, synth, steps, notes).
+- For drum tracks (kick, snare, hat): set synth="square", notes=[]
+- For mono tracks (bass): set sound="kick-01", steps=[]
+
+Track Requirements:
+1. kick: type="drum", sound="kick-01", synth="square", steps=[...], notes=[]
+2. snare: type="drum", sound="snare-01", synth="square", steps=[...], notes=[]
+3. hat: type="drum", sound="hat-closed-01", synth="square", steps=[...], notes=[]
+4. bass: type="mono", sound="kick-01", synth="square", steps=[], notes=[...]
 
 Guidelines:
-- 4 tracks: kick, snare, hat (drum with steps 1-16), bass (mono with notes)
-- Vary the steps for ${style} feel
+- Vary the steps (1-16) for ${style} groove
 - Bass notes: C minor scale (C2, D2, Eb2, F2, G2, Ab2, Bb2)
-- Note lengths: 8n, 16n, or 4n`
+- Note lengths: 8n, 16n, or 4n
+- Be creative and make each generation different!`
                                 }
                             ],
                             temperature: 1.0,
@@ -771,51 +779,32 @@ Guidelines:
                                             tracks: {
                                                 type: "array",
                                                 items: {
-                                                    oneOf: [
-                                                        {
-                                                            type: "object",
-                                                            properties: {
-                                                                id: { type: "string" },
-                                                                type: {
-                                                                    type: "string",
-                                                                    const: "drum"
-                                                                },
-                                                                sound: { type: "string" },
-                                                                steps: {
-                                                                    type: "array",
-                                                                    items: { type: "number" }
-                                                                }
-                                                            },
-                                                            required: ["id", "type", "sound", "steps"],
-                                                            additionalProperties: false
+                                                    type: "object",
+                                                    properties: {
+                                                        id: { type: "string" },
+                                                        type: { type: "string" },
+                                                        sound: { type: "string" },
+                                                        synth: { type: "string" },
+                                                        steps: {
+                                                            type: "array",
+                                                            items: { type: "number" }
                                                         },
-                                                        {
-                                                            type: "object",
-                                                            properties: {
-                                                                id: { type: "string" },
-                                                                type: {
-                                                                    type: "string",
-                                                                    const: "mono"
+                                                        notes: {
+                                                            type: "array",
+                                                            items: {
+                                                                type: "object",
+                                                                properties: {
+                                                                    step: { type: "number" },
+                                                                    pitch: { type: "string" },
+                                                                    len: { type: "string" }
                                                                 },
-                                                                synth: { type: "string" },
-                                                                notes: {
-                                                                    type: "array",
-                                                                    items: {
-                                                                        type: "object",
-                                                                        properties: {
-                                                                            step: { type: "number" },
-                                                                            pitch: { type: "string" },
-                                                                            len: { type: "string" }
-                                                                        },
-                                                                        required: ["step", "pitch", "len"],
-                                                                        additionalProperties: false
-                                                                    }
-                                                                }
-                                                            },
-                                                            required: ["id", "type", "synth", "notes"],
-                                                            additionalProperties: false
+                                                                required: ["step", "pitch", "len"],
+                                                                additionalProperties: false
+                                                            }
                                                         }
-                                                    ]
+                                                    },
+                                                    required: ["id", "type", "sound", "synth", "steps", "notes"],
+                                                    additionalProperties: false
                                                 }
                                             }
                                         },

@@ -145,6 +145,18 @@
             font-weight: bold;
             text-transform: uppercase;
             font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .track-label select {
+            font-size: 0.7rem;
+            padding: 0.2rem;
+            width: 100%;
+            background: #333;
+            border: 1px solid #555;
+            color: #aaa;
         }
 
         .steps {
@@ -161,11 +173,18 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: #666;
         }
 
         .step.active {
             background: #00d9ff;
             border-color: #00d9ff;
+            color: #1a1a1a;
         }
 
         .step.playing {
@@ -319,20 +338,58 @@
 
             <div class="sequencer">
                 <div class="track" data-track="kick">
-                    <div class="track-label">Kick</div>
+                    <div class="track-label">
+                        <span>Kick</span>
+                        <select id="kick-sound">
+                            <option value="808">808</option>
+                            <option value="909" selected>909</option>
+                            <option value="acoustic">Acoustic</option>
+                        </select>
+                    </div>
                     <div class="steps" id="kick-steps"></div>
                 </div>
                 <div class="track" data-track="snare">
-                    <div class="track-label">Snare</div>
+                    <div class="track-label">
+                        <span>Snare</span>
+                        <select id="snare-sound">
+                            <option value="white" selected>White</option>
+                            <option value="pink">Pink</option>
+                            <option value="clap">Clap</option>
+                        </select>
+                    </div>
                     <div class="steps" id="snare-steps"></div>
                 </div>
                 <div class="track" data-track="hat">
-                    <div class="track-label">Hat</div>
+                    <div class="track-label">
+                        <span>Hat</span>
+                        <select id="hat-sound">
+                            <option value="closed" selected>Closed</option>
+                            <option value="open">Open</option>
+                        </select>
+                    </div>
                     <div class="steps" id="hat-steps"></div>
                 </div>
                 <div class="track" data-track="bass">
-                    <div class="track-label">Bass</div>
+                    <div class="track-label">
+                        <span>Bass</span>
+                        <select id="bass-sound">
+                            <option value="square" selected>Square</option>
+                            <option value="sawtooth">Sawtooth</option>
+                            <option value="sine">Sine</option>
+                            <option value="triangle">Triangle</option>
+                        </select>
+                    </div>
                     <div class="steps" id="bass-steps"></div>
+                </div>
+                <div class="track" data-track="chord">
+                    <div class="track-label">
+                        <span>Chord</span>
+                        <select id="chord-sound">
+                            <option value="pad" selected>Pad</option>
+                            <option value="pluck">Pluck</option>
+                        </select>
+                    </div>
+                    <div class="steps" id="chord-steps"></div>
                 </div>
             </div>
 
@@ -379,8 +436,10 @@
         // State Management
         // ============================================================
         let currentPattern = null;
-        let players = {};
-        let synth = null;
+        let players = {};  // Current active players
+        let soundLibrary = {};  // All available sound variations
+        let synth = null;  // Bass synth
+        let chordSynth = null;  // Chord synth
         let recorder = null;
         let isRecording = false;
         let sequence = null;
@@ -393,12 +452,15 @@
                 version: "pattern-v1",
                 meta: { style: "house", bpm: 124, swing: 0.55, scale: "C minor" },
                 tracks: [
-                    { id: "kick", type: "drum", sound: "kick-01", steps: [1, 5, 9, 13] },
-                    { id: "snare", type: "drum", sound: "snare-01", steps: [5, 13] },
-                    { id: "hat", type: "drum", sound: "hat-closed-01", steps: [3, 7, 11, 15] },
-                    { id: "bass", type: "mono", synth: "square", notes: [
+                    { id: "kick", type: "drum", sound: "kick-01", soundType: "909", steps: [1, 5, 9, 13] },
+                    { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [5, 13] },
+                    { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [3, 7, 11, 15] },
+                    { id: "bass", type: "mono", synth: "square", soundType: "square", notes: [
                         { step: 1, pitch: "C2", len: "8n" },
                         { step: 9, pitch: "C2", len: "8n" }
+                    ]},
+                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [
+                        { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "2n" }
                     ]}
                 ]
             },
@@ -406,11 +468,14 @@
                 version: "pattern-v1",
                 meta: { style: "boom-bap", bpm: 90, swing: 0.58, scale: "C minor" },
                 tracks: [
-                    { id: "kick", type: "drum", sound: "kick-01", steps: [1, 11] },
-                    { id: "snare", type: "drum", sound: "snare-01", steps: [5, 13] },
-                    { id: "hat", type: "drum", sound: "hat-closed-01", steps: [2, 4, 6, 8, 10, 12, 14, 16] },
-                    { id: "bass", type: "mono", synth: "square", notes: [
+                    { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [1, 11] },
+                    { id: "snare", type: "drum", sound: "snare-01", soundType: "pink", steps: [5, 13] },
+                    { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [2, 4, 6, 8, 10, 12, 14, 16] },
+                    { id: "bass", type: "mono", synth: "square", soundType: "sawtooth", notes: [
                         { step: 1, pitch: "C2", len: "4n" }
+                    ]},
+                    { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [
+                        { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "1m" }
                     ]}
                 ]
             },
@@ -418,13 +483,17 @@
                 version: "pattern-v1",
                 meta: { style: "trap", bpm: 140, swing: 0.52, scale: "C minor" },
                 tracks: [
-                    { id: "kick", type: "drum", sound: "kick-01", steps: [1, 9] },
-                    { id: "snare", type: "drum", sound: "snare-01", steps: [5, 13] },
-                    { id: "hat", type: "drum", sound: "hat-closed-01", steps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
-                    { id: "bass", type: "mono", synth: "square", notes: [
+                    { id: "kick", type: "drum", sound: "kick-01", soundType: "808", steps: [1, 9] },
+                    { id: "snare", type: "drum", sound: "snare-01", soundType: "clap", steps: [5, 13] },
+                    { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "open", steps: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
+                    { id: "bass", type: "mono", synth: "square", soundType: "sine", notes: [
                         { step: 1, pitch: "C2", len: "16n" },
                         { step: 3, pitch: "C3", len: "16n" },
                         { step: 9, pitch: "C2", len: "16n" }
+                    ]},
+                    { id: "chord", type: "poly", synth: "pluck", soundType: "pluck", chords: [
+                        { step: 1, name: "Cm", notes: ["C4", "Eb4", "G4"], len: "4n" },
+                        { step: 9, name: "Ab", notes: ["Ab3", "C4", "Eb4"], len: "4n" }
                     ]}
                 ]
             }
@@ -435,7 +504,7 @@
         // ============================================================
         function initializeUI() {
             // Create step buttons
-            ["kick", "snare", "hat", "bass"].forEach(trackId => {
+            ["kick", "snare", "hat", "bass", "chord"].forEach(trackId => {
                 const container = document.getElementById(`${trackId}-steps`);
                 for (let i = 1; i <= 16; i++) {
                     const step = document.createElement("div");
@@ -457,6 +526,13 @@
             document.getElementById("copy-json-btn").addEventListener("click", copyJSON);
             document.getElementById("create-url-btn").addEventListener("click", createShareURL);
             document.getElementById("import-btn").addEventListener("click", importJSON);
+
+            // Sound selection listeners
+            document.getElementById("kick-sound").addEventListener("change", (e) => changeSoundType("kick", e.target.value));
+            document.getElementById("snare-sound").addEventListener("change", (e) => changeSoundType("snare", e.target.value));
+            document.getElementById("hat-sound").addEventListener("change", (e) => changeSoundType("hat", e.target.value));
+            document.getElementById("bass-sound").addEventListener("change", (e) => changeSoundType("bass", e.target.value));
+            document.getElementById("chord-sound").addEventListener("change", (e) => changeSoundType("chord", e.target.value));
 
             // Check for URL parameter
             const urlParams = new URLSearchParams(window.location.search);
@@ -490,9 +566,37 @@
             document.getElementById("swing-value").textContent = pattern.meta.swing;
             document.getElementById("style").value = pattern.meta.style;
 
+            // Update sound type selectors and switch active sounds
+            pattern.tracks.forEach(track => {
+                let soundType = track.soundType;
+                if (!soundType) {
+                    // Default sound types
+                    if (track.id === "bass") soundType = "square";
+                    else if (track.id === "chord") soundType = "pad";
+                    else soundType = "909";
+                }
+
+                const selector = document.getElementById(`${track.id}-sound`);
+                if (selector) {
+                    selector.value = soundType;
+                }
+
+                // Switch to the appropriate sound
+                if (soundLibrary[track.id] && soundLibrary[track.id][soundType]) {
+                    if (track.id === "bass") {
+                        synth = soundLibrary[track.id][soundType];
+                    } else if (track.id === "chord") {
+                        chordSynth = soundLibrary[track.id][soundType];
+                    } else {
+                        players[track.id] = soundLibrary[track.id][soundType];
+                    }
+                }
+            });
+
             // Clear all steps
             document.querySelectorAll(".step").forEach(step => {
                 step.classList.remove("active");
+                step.textContent = "";  // Clear pitch labels
             });
 
             // Set active steps
@@ -505,7 +609,20 @@
                 } else if (track.type === "mono" && track.notes) {
                     track.notes.forEach(note => {
                         const stepEl = document.querySelector(`#${track.id}-steps .step[data-step="${note.step}"]`);
-                        if (stepEl) stepEl.classList.add("active");
+                        if (stepEl) {
+                            stepEl.classList.add("active");
+                            // Display pitch on bass track
+                            stepEl.textContent = note.pitch;
+                        }
+                    });
+                } else if (track.type === "poly" && track.chords) {
+                    track.chords.forEach(chord => {
+                        const stepEl = document.querySelector(`#${track.id}-steps .step[data-step="${chord.step}"]`);
+                        if (stepEl) {
+                            stepEl.classList.add("active");
+                            // Display chord name
+                            stepEl.textContent = chord.name;
+                        }
                     });
                 }
             });
@@ -519,28 +636,99 @@
 
         function toggleStep(trackId, stepNum) {
             const stepEl = document.querySelector(`#${trackId}-steps .step[data-step="${stepNum}"]`);
-            stepEl.classList.toggle("active");
-
-            // Update pattern
             const track = currentPattern.tracks.find(t => t.id === trackId);
-            if (track) {
-                if (track.type === "drum") {
-                    if (!track.steps) track.steps = [];
-                    const index = track.steps.indexOf(stepNum);
-                    if (index > -1) {
-                        track.steps.splice(index, 1);
-                    } else {
-                        track.steps.push(stepNum);
-                        track.steps.sort((a, b) => a - b);
-                    }
-                } else if (track.type === "mono") {
-                    if (!track.notes) track.notes = [];
-                    const noteIndex = track.notes.findIndex(n => n.step === stepNum);
-                    if (noteIndex > -1) {
+            if (!track) return;
+
+            if (track.type === "drum") {
+                // Drum tracks: simple toggle
+                stepEl.classList.toggle("active");
+                if (!track.steps) track.steps = [];
+                const index = track.steps.indexOf(stepNum);
+                if (index > -1) {
+                    track.steps.splice(index, 1);
+                } else {
+                    track.steps.push(stepNum);
+                    track.steps.sort((a, b) => a - b);
+                }
+            } else if (track.type === "mono") {
+                // Bass track: pitch selection
+                if (!track.notes) track.notes = [];
+                const noteIndex = track.notes.findIndex(n => n.step === stepNum);
+
+                if (noteIndex > -1) {
+                    // Note exists: ask if user wants to change pitch or delete
+                    const currentPitch = track.notes[noteIndex].pitch;
+                    const newPitch = prompt(`音程を変更 (現在: ${currentPitch})\n\n利用可能: C2, D2, Eb2, F2, G2, Ab2, Bb2, C3\n空欄で削除`, currentPitch);
+
+                    if (newPitch === null) {
+                        // Cancelled
+                        return;
+                    } else if (newPitch === "") {
+                        // Delete note
                         track.notes.splice(noteIndex, 1);
+                        stepEl.classList.remove("active");
+                        stepEl.textContent = "";
                     } else {
-                        track.notes.push({ step: stepNum, pitch: "C2", len: "8n" });
+                        // Update pitch
+                        track.notes[noteIndex].pitch = newPitch;
+                        stepEl.textContent = newPitch;
+                    }
+                } else {
+                    // No note: create new one
+                    const newPitch = prompt(`音程を入力\n\n利用可能: C2, D2, Eb2, F2, G2, Ab2, Bb2, C3`, "C2");
+                    if (newPitch && newPitch.trim()) {
+                        track.notes.push({ step: stepNum, pitch: newPitch.trim(), len: "8n" });
                         track.notes.sort((a, b) => a.step - b.step);
+                        stepEl.classList.add("active");
+                        stepEl.textContent = newPitch.trim();
+                    }
+                }
+            } else if (track.type === "poly") {
+                // Chord track: chord selection
+                if (!track.chords) track.chords = [];
+                const chordIndex = track.chords.findIndex(c => c.step === stepNum);
+
+                // Common chords in C minor
+                const commonChords = {
+                    "Cm": ["C3", "Eb3", "G3"],
+                    "Fm": ["F3", "Ab3", "C4"],
+                    "G7": ["G3", "B3", "D4", "F4"],
+                    "Ab": ["Ab3", "C4", "Eb4"],
+                    "Eb": ["Eb3", "G3", "Bb3"],
+                    "Bb": ["Bb3", "D4", "F4"]
+                };
+
+                if (chordIndex > -1) {
+                    // Chord exists: ask if user wants to change or delete
+                    const currentChord = track.chords[chordIndex].name;
+                    const newChord = prompt(`コードを変更 (現在: ${currentChord})\n\n利用可能: Cm, Fm, G7, Ab, Eb, Bb\n空欄で削除`, currentChord);
+
+                    if (newChord === null) {
+                        // Cancelled
+                        return;
+                    } else if (newChord === "") {
+                        // Delete chord
+                        track.chords.splice(chordIndex, 1);
+                        stepEl.classList.remove("active");
+                        stepEl.textContent = "";
+                    } else {
+                        // Update chord
+                        const chordName = newChord.trim();
+                        const notes = commonChords[chordName] || ["C3", "Eb3", "G3"];
+                        track.chords[chordIndex].name = chordName;
+                        track.chords[chordIndex].notes = notes;
+                        stepEl.textContent = chordName;
+                    }
+                } else {
+                    // No chord: create new one
+                    const newChord = prompt(`コードを入力\n\n利用可能: Cm, Fm, G7, Ab, Eb, Bb`, "Cm");
+                    if (newChord && newChord.trim()) {
+                        const chordName = newChord.trim();
+                        const notes = commonChords[chordName] || ["C3", "Eb3", "G3"];
+                        track.chords.push({ step: stepNum, name: chordName, notes: notes, len: "2n" });
+                        track.chords.sort((a, b) => a.step - b.step);
+                        stepEl.classList.add("active");
+                        stepEl.textContent = chordName;
                     }
                 }
             }
@@ -551,6 +739,31 @@
         // ============================================================
         // Event Handlers
         // ============================================================
+        function changeSoundType(trackId, soundType) {
+            if (!currentPattern) return;
+
+            // Update pattern data
+            const track = currentPattern.tracks.find(t => t.id === trackId);
+            if (track) {
+                track.soundType = soundType;
+            }
+
+            // Switch active player/synth
+            if (soundLibrary[trackId] && soundLibrary[trackId][soundType]) {
+                if (trackId === "bass") {
+                    synth = soundLibrary[trackId][soundType];
+                } else if (trackId === "chord") {
+                    chordSynth = soundLibrary[trackId][soundType];
+                } else {
+                    players[trackId] = soundLibrary[trackId][soundType];
+                }
+                setStatus(`${trackId.toUpperCase()}: ${soundType}に変更`, "success");
+            }
+
+            // Update JSON display
+            document.getElementById("pattern-json").value = JSON.stringify(currentPattern, null, 2);
+        }
+
         function handleStyleChange(e) {
             const style = e.target.value;
             if (PRESETS[style]) {
@@ -584,36 +797,98 @@
             await Tone.start();
             console.log("Audio initialized");
 
-            // Use synthesizers for drum sounds (no external samples needed)
-            // Kick drum - low frequency membrane synth
-            players.kick = new Tone.MembraneSynth({
-                pitchDecay: 0.05,
-                octaves: 10,
-                oscillator: { type: "sine" },
-                envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4 }
-            }).toDestination();
+            // Create sound library with all variations
+            soundLibrary = {
+                kick: {
+                    "808": new Tone.MembraneSynth({
+                        pitchDecay: 0.08,
+                        octaves: 8,
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.001, decay: 0.8, sustain: 0, release: 0.8 }
+                    }).toDestination(),
+                    "909": new Tone.MembraneSynth({
+                        pitchDecay: 0.05,
+                        octaves: 10,
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.001, decay: 0.3, sustain: 0.01, release: 0.2 }
+                    }).toDestination(),
+                    "acoustic": new Tone.MembraneSynth({
+                        pitchDecay: 0.03,
+                        octaves: 6,
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.005, decay: 0.5, sustain: 0.05, release: 0.4 }
+                    }).toDestination()
+                },
+                snare: {
+                    "white": new Tone.NoiseSynth({
+                        noise: { type: "white" },
+                        envelope: { attack: 0.001, decay: 0.2, sustain: 0 }
+                    }).toDestination(),
+                    "pink": new Tone.NoiseSynth({
+                        noise: { type: "pink" },
+                        envelope: { attack: 0.001, decay: 0.15, sustain: 0 }
+                    }).toDestination(),
+                    "clap": new Tone.NoiseSynth({
+                        noise: { type: "white" },
+                        envelope: { attack: 0.005, decay: 0.12, sustain: 0, release: 0.05 }
+                    }).toDestination()
+                },
+                hat: {
+                    "closed": new Tone.MetalSynth({
+                        frequency: 200,
+                        envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
+                        harmonicity: 5.1,
+                        modulationIndex: 32,
+                        resonance: 4000,
+                        octaves: 1.5
+                    }).toDestination(),
+                    "open": new Tone.MetalSynth({
+                        frequency: 180,
+                        envelope: { attack: 0.001, decay: 0.3, release: 0.2 },
+                        harmonicity: 4.5,
+                        modulationIndex: 28,
+                        resonance: 3500,
+                        octaves: 1.8
+                    }).toDestination()
+                },
+                bass: {
+                    "square": new Tone.MonoSynth({
+                        oscillator: { type: "square" },
+                        envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 0.1 }
+                    }).toDestination(),
+                    "sawtooth": new Tone.MonoSynth({
+                        oscillator: { type: "sawtooth" },
+                        envelope: { attack: 0.005, decay: 0.15, sustain: 0.4, release: 0.15 }
+                    }).toDestination(),
+                    "sine": new Tone.MonoSynth({
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.2 }
+                    }).toDestination(),
+                    "triangle": new Tone.MonoSynth({
+                        oscillator: { type: "triangle" },
+                        envelope: { attack: 0.005, decay: 0.15, sustain: 0.35, release: 0.15 }
+                    }).toDestination()
+                }
+            };
 
-            // Snare drum - noise synth
-            players.snare = new Tone.NoiseSynth({
-                noise: { type: "white" },
-                envelope: { attack: 0.001, decay: 0.2, sustain: 0 }
-            }).toDestination();
+            // Chord synthesizers
+            soundLibrary.chord = {
+                "pad": new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.3, decay: 0.5, sustain: 0.7, release: 1.5 }
+                }).toDestination(),
+                "pluck": new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.3 }
+                }).toDestination()
+            };
 
-            // Hi-hat - metallic synth
-            players.hat = new Tone.MetalSynth({
-                frequency: 200,
-                envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
-                harmonicity: 5.1,
-                modulationIndex: 32,
-                resonance: 4000,
-                octaves: 1.5
-            }).toDestination();
-
-            // Bass synth
-            synth = new Tone.MonoSynth({
-                oscillator: { type: "square" },
-                envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 0.1 }
-            }).toDestination();
+            // Set default active players
+            players.kick = soundLibrary.kick["909"];
+            players.snare = soundLibrary.snare["white"];
+            players.hat = soundLibrary.hat["closed"];
+            synth = soundLibrary.bass["square"];
+            chordSynth = soundLibrary.chord["pad"];
         }
 
         function play() {
@@ -632,7 +907,7 @@
                         s.classList.add("playing");
                     });
 
-                    // Play drums
+                    // Play all tracks
                     currentPattern.tracks.forEach(track => {
                         if (track.type === "drum" && track.steps && track.steps.includes(step)) {
                             if (players[track.id]) {
@@ -649,6 +924,11 @@
                             const note = track.notes.find(n => n.step === step);
                             if (note && synth) {
                                 synth.triggerAttackRelease(note.pitch, note.len, time);
+                            }
+                        } else if (track.type === "poly" && track.chords) {
+                            const chord = track.chords.find(c => c.step === step);
+                            if (chord && chordSynth) {
+                                chordSynth.triggerAttackRelease(chord.notes, chord.len, time);
                             }
                         }
                     });
@@ -750,27 +1030,39 @@
                             messages: [
                                 {
                                     role: "system",
-                                    content: "You are a professional music producer creating drum patterns and basslines."
+                                    content: "You are a professional music producer creating drum patterns, basslines, and chord progressions."
                                 },
                                 {
                                     role: "user",
                                     content: `Create a unique ${style} beat pattern at ${bpm} BPM with ${swing} swing.
 
 IMPORTANT: version must be exactly "pattern-v1"
-All tracks must include ALL fields (id, type, sound, synth, steps, notes).
-- For drum tracks (kick, snare, hat): set synth="square", notes=[]
-- For mono tracks (bass): set sound="kick-01", steps=[]
+All tracks must include appropriate fields based on type.
 
 Track Requirements:
-1. kick: type="drum", sound="kick-01", synth="square", steps=[...], notes=[]
-2. snare: type="drum", sound="snare-01", synth="square", steps=[...], notes=[]
-3. hat: type="drum", sound="hat-closed-01", synth="square", steps=[...], notes=[]
-4. bass: type="mono", sound="kick-01", synth="square", steps=[], notes=[...]
+1. kick: type="drum", sound="kick-01", soundType (choose: "808" for deep/boomy, "909" for punchy, "acoustic" for natural), synth="square", steps=[...], notes=[]
+2. snare: type="drum", sound="snare-01", soundType (choose: "white" for sharp, "pink" for warm, "clap" for rhythmic), synth="square", steps=[...], notes=[]
+3. hat: type="drum", sound="hat-closed-01", soundType (choose: "closed" for tight, "open" for sustained), synth="square", steps=[...], notes=[]
+4. bass: type="mono", sound="kick-01", soundType (choose: "square" for aggressive, "sawtooth" for fat, "sine" for sub, "triangle" for soft), synth="square", steps=[], notes=[...]
+5. chord: type="poly", sound="pad-01", soundType (choose: "pad" for sustained, "pluck" for rhythmic), synth="pad", steps=[], notes=[], chords=[...]
+
+Style-specific sound suggestions:
+- House: kick="909", snare="white", hat="closed", bass="sawtooth", chord="pad"
+- Trap: kick="808", snare="clap", hat="open", bass="sine", chord="pluck"
+- Boom-bap: kick="acoustic", snare="pink", hat="closed", bass="square", chord="pad"
+
+Chord progressions in C minor:
+- Common chords: Cm, Fm, G7, Ab, Eb, Bb
+- Chord notes: Cm=[C3,Eb3,G3], Fm=[F3,Ab3,C4], G7=[G3,B3,D4,F4], Ab=[Ab3,C4,Eb4], Eb=[Eb3,G3,Bb3], Bb=[Bb3,D4,F4]
+- Use 2-4 chords per pattern
+- Chord lengths: 2n, 1m, or 4n
 
 Guidelines:
 - Vary the steps (1-16) for ${style} groove
 - Bass notes: C minor scale (C2, D2, Eb2, F2, G2, Ab2, Bb2)
 - Note lengths: 8n, 16n, or 4n
+- Choose soundType based on style and musicality
+- Create harmonic progressions that complement the bass
 - Be creative and make each generation different!`
                                 }
                             ],
@@ -806,6 +1098,7 @@ Guidelines:
                                                         id: { type: "string" },
                                                         type: { type: "string" },
                                                         sound: { type: "string" },
+                                                        soundType: { type: "string" },
                                                         synth: { type: "string" },
                                                         steps: {
                                                             type: "array",
@@ -823,9 +1116,26 @@ Guidelines:
                                                                 required: ["step", "pitch", "len"],
                                                                 additionalProperties: false
                                                             }
+                                                        },
+                                                        chords: {
+                                                            type: "array",
+                                                            items: {
+                                                                type: "object",
+                                                                properties: {
+                                                                    step: { type: "number" },
+                                                                    name: { type: "string" },
+                                                                    notes: {
+                                                                        type: "array",
+                                                                        items: { type: "string" }
+                                                                    },
+                                                                    len: { type: "string" }
+                                                                },
+                                                                required: ["step", "name", "notes", "len"],
+                                                                additionalProperties: false
+                                                            }
                                                         }
                                                     },
-                                                    required: ["id", "type", "sound", "synth", "steps", "notes"],
+                                                    required: ["id", "type", "sound", "soundType", "synth", "steps", "notes", "chords"],
                                                     additionalProperties: false
                                                 }
                                             }

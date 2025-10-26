@@ -728,7 +728,7 @@
                         body: JSON.stringify({
                             contents: [{
                                 parts: [{
-                                    text: `Generate a ${style} beat pattern. Return ONLY valid JSON matching this exact structure:
+                                    text: `Create a ${style} beat pattern. Output EXACTLY this JSON structure with ONLY these 4 tracks in order:
 
 {
   "version": "pattern-v1",
@@ -755,70 +755,114 @@
       "id": "hat",
       "type": "drum",
       "sound": "hat-closed-01",
-      "steps": [1, 3, 5, 7, 9, 11, 13, 15]
+      "steps": [3, 7, 11, 15]
     },
     {
       "id": "bass",
       "type": "mono",
       "synth": "square",
       "notes": [
-        {"step": 1, "pitch": "C2", "len": "8n"},
-        {"step": 9, "pitch": "Eb2", "len": "8n"}
+        {"step": 1, "pitch": "C2", "len": "8n"}
       ]
     }
   ]
 }
 
-Rules:
-- steps: 1-16 only, don't use all 16
-- bass pitch: C2, D2, Eb2, F2, G2, Ab2, Bb2 only
-- bass len: "8n", "16n", or "4n" only
-- Keep it simple and groovy for ${style} style`
+STRICT RULES:
+- EXACTLY 4 tracks: kick, snare, hat, bass (in that order)
+- Track IDs MUST be: "kick", "snare", "hat", "bass"
+- Sounds MUST be: "kick-01", "snare-01", "hat-closed-01"
+- Bass synth MUST be: "square"
+- Bass pitch ONLY: C2, D2, Eb2, F2, G2, Ab2, Bb2
+- Note length ONLY: "8n", "16n", "4n"
+- Steps: 1-16, don't overcrowd
+- Make it groovy for ${style}`
                                 }]
                             }],
                             generationConfig: {
-                                temperature: 0.7,
-                                maxOutputTokens: 8192,
+                                temperature: 0.3,
+                                maxOutputTokens: 2048,
                                 responseMimeType: "application/json",
                                 responseSchema: {
                                     type: "object",
                                     properties: {
                                         version: {
                                             type: "string",
-                                            description: "Pattern version identifier",
                                             enum: ["pattern-v1"]
                                         },
                                         meta: {
                                             type: "object",
                                             properties: {
-                                                style: { type: "string" },
-                                                bpm: { type: "number" },
-                                                swing: { type: "number" },
-                                                scale: { type: "string" }
+                                                style: {
+                                                    type: "string",
+                                                    enum: ["house", "boom-bap", "trap", "custom"]
+                                                },
+                                                bpm: {
+                                                    type: "number",
+                                                    minimum: 60,
+                                                    maximum: 200
+                                                },
+                                                swing: {
+                                                    type: "number",
+                                                    minimum: 0.5,
+                                                    maximum: 0.62
+                                                },
+                                                scale: {
+                                                    type: "string",
+                                                    enum: ["C minor"]
+                                                }
                                             },
                                             required: ["style", "bpm", "swing", "scale"]
                                         },
                                         tracks: {
                                             type: "array",
+                                            minItems: 4,
+                                            maxItems: 4,
                                             items: {
                                                 type: "object",
                                                 properties: {
-                                                    id: { type: "string" },
-                                                    type: { type: "string" },
-                                                    sound: { type: "string" },
-                                                    synth: { type: "string" },
+                                                    id: {
+                                                        type: "string",
+                                                        enum: ["kick", "snare", "hat", "bass"]
+                                                    },
+                                                    type: {
+                                                        type: "string",
+                                                        enum: ["drum", "mono"]
+                                                    },
+                                                    sound: {
+                                                        type: "string",
+                                                        enum: ["kick-01", "snare-01", "hat-closed-01"]
+                                                    },
+                                                    synth: {
+                                                        type: "string",
+                                                        enum: ["square"]
+                                                    },
                                                     steps: {
                                                         type: "array",
-                                                        items: { type: "number" }
+                                                        items: {
+                                                            type: "number",
+                                                            minimum: 1,
+                                                            maximum: 16
+                                                        }
                                                     },
                                                     notes: {
                                                         type: "array",
                                                         items: {
                                                             type: "object",
                                                             properties: {
-                                                                step: { type: "number" },
-                                                                pitch: { type: "string" },
-                                                                len: { type: "string" }
+                                                                step: {
+                                                                    type: "number",
+                                                                    minimum: 1,
+                                                                    maximum: 16
+                                                                },
+                                                                pitch: {
+                                                                    type: "string",
+                                                                    enum: ["C2", "D2", "Eb2", "F2", "G2", "Ab2", "Bb2", "C3", "D3", "Eb3", "F3", "G3"]
+                                                                },
+                                                                len: {
+                                                                    type: "string",
+                                                                    enum: ["8n", "16n", "4n"]
+                                                                }
                                                             },
                                                             required: ["step", "pitch", "len"]
                                                         }

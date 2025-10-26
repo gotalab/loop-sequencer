@@ -728,8 +728,9 @@
                         body: JSON.stringify({
                             contents: [{
                                 parts: [{
-                                    text: `Create a ${style} beat pattern. Output EXACTLY this JSON structure with ONLY these 4 tracks in order:
+                                    text: `Create a unique ${style} beat pattern. Be creative and vary the rhythm!
 
+Return this JSON structure:
 {
   "version": "pattern-v1",
   "meta": {
@@ -739,48 +740,26 @@
     "scale": "C minor"
   },
   "tracks": [
-    {
-      "id": "kick",
-      "type": "drum",
-      "sound": "kick-01",
-      "steps": [1, 5, 9, 13]
-    },
-    {
-      "id": "snare",
-      "type": "drum",
-      "sound": "snare-01",
-      "steps": [5, 13]
-    },
-    {
-      "id": "hat",
-      "type": "drum",
-      "sound": "hat-closed-01",
-      "steps": [3, 7, 11, 15]
-    },
-    {
-      "id": "bass",
-      "type": "mono",
-      "synth": "square",
-      "notes": [
-        {"step": 1, "pitch": "C2", "len": "8n"}
-      ]
-    }
+    {"id": "kick", "type": "drum", "sound": "kick-01", "steps": [...]},
+    {"id": "snare", "type": "drum", "sound": "snare-01", "steps": [...]},
+    {"id": "hat", "type": "drum", "sound": "hat-closed-01", "steps": [...]},
+    {"id": "bass", "type": "mono", "synth": "square", "notes": [...]}
   ]
 }
 
-STRICT RULES:
-- EXACTLY 4 tracks: kick, snare, hat, bass (in that order)
-- Track IDs MUST be: "kick", "snare", "hat", "bass"
-- Sounds MUST be: "kick-01", "snare-01", "hat-closed-01"
-- Bass synth MUST be: "square"
-- Bass pitch ONLY: C2, D2, Eb2, F2, G2, Ab2, Bb2
-- Note length ONLY: "8n", "16n", "4n"
-- Steps: 1-16, don't overcrowd
-- Make it groovy for ${style}`
+RULES:
+- 4 tracks: kick, snare, hat (with "steps"), bass (with "notes")
+- sound: "kick-01", "snare-01", "hat-closed-01"
+- synth: "square" (ONE WORD ONLY)
+- steps: array of numbers 1-16, vary them for ${style} feel
+- bass notes: {"step": X, "pitch": "Y", "len": "Z"}
+  - pitch: C2, D2, Eb2, F2, G2, Ab2, Bb2 (C minor scale)
+  - len: "8n", "16n", or "4n"
+- Create DIFFERENT patterns each time!`
                                 }]
                             }],
                             generationConfig: {
-                                temperature: 0.3,
+                                temperature: 1.0,
                                 maxOutputTokens: 2048,
                                 responseMimeType: "application/json",
                                 responseSchema: {
@@ -793,24 +772,10 @@ STRICT RULES:
                                         meta: {
                                             type: "object",
                                             properties: {
-                                                style: {
-                                                    type: "string",
-                                                    enum: ["house", "boom-bap", "trap", "custom"]
-                                                },
-                                                bpm: {
-                                                    type: "number",
-                                                    minimum: 60,
-                                                    maximum: 200
-                                                },
-                                                swing: {
-                                                    type: "number",
-                                                    minimum: 0.5,
-                                                    maximum: 0.62
-                                                },
-                                                scale: {
-                                                    type: "string",
-                                                    enum: ["C minor"]
-                                                }
+                                                style: { type: "string" },
+                                                bpm: { type: "number" },
+                                                swing: { type: "number" },
+                                                scale: { type: "string" }
                                             },
                                             required: ["style", "bpm", "swing", "scale"]
                                         },
@@ -821,48 +786,22 @@ STRICT RULES:
                                             items: {
                                                 type: "object",
                                                 properties: {
-                                                    id: {
-                                                        type: "string",
-                                                        enum: ["kick", "snare", "hat", "bass"]
-                                                    },
-                                                    type: {
-                                                        type: "string",
-                                                        enum: ["drum", "mono"]
-                                                    },
-                                                    sound: {
-                                                        type: "string",
-                                                        enum: ["kick-01", "snare-01", "hat-closed-01"]
-                                                    },
-                                                    synth: {
-                                                        type: "string",
-                                                        enum: ["square"]
-                                                    },
+                                                    id: { type: "string" },
+                                                    type: { type: "string" },
+                                                    sound: { type: "string" },
+                                                    synth: { type: "string" },
                                                     steps: {
                                                         type: "array",
-                                                        items: {
-                                                            type: "number",
-                                                            minimum: 1,
-                                                            maximum: 16
-                                                        }
+                                                        items: { type: "number" }
                                                     },
                                                     notes: {
                                                         type: "array",
                                                         items: {
                                                             type: "object",
                                                             properties: {
-                                                                step: {
-                                                                    type: "number",
-                                                                    minimum: 1,
-                                                                    maximum: 16
-                                                                },
-                                                                pitch: {
-                                                                    type: "string",
-                                                                    enum: ["C2", "D2", "Eb2", "F2", "G2", "Ab2", "Bb2", "C3", "D3", "Eb3", "F3", "G3"]
-                                                                },
-                                                                len: {
-                                                                    type: "string",
-                                                                    enum: ["8n", "16n", "4n"]
-                                                                }
+                                                                step: { type: "number" },
+                                                                pitch: { type: "string" },
+                                                                len: { type: "string" }
                                                             },
                                                             required: ["step", "pitch", "len"]
                                                         }

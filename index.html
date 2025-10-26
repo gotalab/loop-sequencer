@@ -159,6 +159,16 @@
             color: #aaa;
         }
 
+        .track-label input[type="checkbox"] {
+            margin-right: 0.3rem;
+        }
+
+        .track-label .track-name {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
         .steps {
             display: flex;
             gap: 4px;
@@ -315,6 +325,12 @@
                         <option value="house">House</option>
                         <option value="boom-bap">Boom Bap</option>
                         <option value="trap">Trap</option>
+                        <option value="techno">Techno</option>
+                        <option value="dnb">Drum & Bass</option>
+                        <option value="lofi">Lo-fi</option>
+                        <option value="ambient">Ambient</option>
+                        <option value="dubstep">Dubstep</option>
+                        <option value="breakbeat">Breakbeat</option>
                         <option value="custom">Custom</option>
                     </select>
                 </div>
@@ -339,7 +355,10 @@
             <div class="sequencer">
                 <div class="track" data-track="kick">
                     <div class="track-label">
-                        <span>Kick</span>
+                        <div class="track-name">
+                            <input type="checkbox" id="kick-enabled" checked>
+                            <label for="kick-enabled">Kick</label>
+                        </div>
                         <select id="kick-sound">
                             <option value="808">808</option>
                             <option value="909" selected>909</option>
@@ -350,7 +369,10 @@
                 </div>
                 <div class="track" data-track="snare">
                     <div class="track-label">
-                        <span>Snare</span>
+                        <div class="track-name">
+                            <input type="checkbox" id="snare-enabled" checked>
+                            <label for="snare-enabled">Snare</label>
+                        </div>
                         <select id="snare-sound">
                             <option value="white" selected>White</option>
                             <option value="pink">Pink</option>
@@ -361,7 +383,10 @@
                 </div>
                 <div class="track" data-track="hat">
                     <div class="track-label">
-                        <span>Hat</span>
+                        <div class="track-name">
+                            <input type="checkbox" id="hat-enabled" checked>
+                            <label for="hat-enabled">Hat</label>
+                        </div>
                         <select id="hat-sound">
                             <option value="closed" selected>Closed</option>
                             <option value="open">Open</option>
@@ -371,7 +396,10 @@
                 </div>
                 <div class="track" data-track="bass">
                     <div class="track-label">
-                        <span>Bass</span>
+                        <div class="track-name">
+                            <input type="checkbox" id="bass-enabled" checked>
+                            <label for="bass-enabled">Bass</label>
+                        </div>
                         <select id="bass-sound">
                             <option value="square" selected>Square</option>
                             <option value="sawtooth">Sawtooth</option>
@@ -383,7 +411,10 @@
                 </div>
                 <div class="track" data-track="chord">
                     <div class="track-label">
-                        <span>Chord</span>
+                        <div class="track-name">
+                            <input type="checkbox" id="chord-enabled" checked>
+                            <label for="chord-enabled">Chord</label>
+                        </div>
                         <select id="chord-sound">
                             <option value="pad" selected>Pad</option>
                             <option value="pluck">Pluck</option>
@@ -407,6 +438,15 @@
                 <div class="checkbox-group">
                     <input type="checkbox" id="no-llm-mode">
                     <label for="no-llm-mode">LLMなしモードで使う</label>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎨 カスタム指示</h2>
+                <label>曲調・雰囲気の追加指示（任意）</label>
+                <textarea id="custom-prompt" placeholder="例: ワルツ調の3拍子、暗くて重厚な雰囲気、ミニマルでキックとベースだけ、明るくて軽快な感じ" style="height: 80px;"></textarea>
+                <div style="font-size: 0.75rem; color: #666; margin-top: 0.3rem;">
+                    💡 ヒント: ジャンル、拍子、雰囲気、使用トラック、キーなどを自由に指定できます
                 </div>
             </div>
 
@@ -1011,6 +1051,20 @@
             const style = document.getElementById("style").value;
             const bpm = document.getElementById("bpm").value;
             const swing = document.getElementById("swing").value;
+            const customPrompt = document.getElementById("custom-prompt").value.trim();
+
+            // Check which tracks are enabled
+            const enabledTracks = {
+                kick: document.getElementById("kick-enabled").checked,
+                snare: document.getElementById("snare-enabled").checked,
+                hat: document.getElementById("hat-enabled").checked,
+                bass: document.getElementById("bass-enabled").checked,
+                chord: document.getElementById("chord-enabled").checked
+            };
+            const enabledList = Object.entries(enabledTracks)
+                .filter(([_, enabled]) => enabled)
+                .map(([track, _]) => track)
+                .join(", ");
 
             setStatus("GPT-5-miniでパターン生成中...", "");
             document.getElementById("generate-btn").disabled = true;
@@ -1034,39 +1088,52 @@
                                 },
                                 {
                                     role: "user",
-                                    content: `Create a unique ${style} beat pattern at ${bpm} BPM with ${swing} swing.
+                                    content: `Create a ${style} beat pattern at ${bpm} BPM with ${swing} swing.${customPrompt ? `\n\n🎨 SPECIAL USER REQUEST: ${customPrompt}` : ''}
+
+⚡ ENABLED TRACKS: ${enabledList}
+${enabledList !== "kick, snare, hat, bass, chord" ? "Focus on the enabled tracks only. Leave disabled tracks MINIMAL (empty arrays)." : ""}
 
 IMPORTANT: version must be exactly "pattern-v1"
-All tracks must include appropriate fields based on type.
 
-Track Requirements:
-1. kick: type="drum", sound="kick-01", soundType (choose: "808" for deep/boomy, "909" for punchy, "acoustic" for natural), synth="square", steps=[...], notes=[]
-2. snare: type="drum", sound="snare-01", soundType (choose: "white" for sharp, "pink" for warm, "clap" for rhythmic), synth="square", steps=[...], notes=[]
-3. hat: type="drum", sound="hat-closed-01", soundType (choose: "closed" for tight, "open" for sustained), synth="square", steps=[...], notes=[]
-4. bass: type="mono", sound="kick-01", soundType (choose: "square" for aggressive, "sawtooth" for fat, "sine" for sub, "triangle" for soft), synth="square", steps=[], notes=[...]
-5. chord: type="poly", sound="pad-01", soundType (choose: "pad" for sustained, "pluck" for rhythmic), synth="pad", steps=[], notes=[], chords=[...]
+🎵 CREATIVE FREEDOM:
+You have complete creative control! Feel free to:
+- Leave tracks EMPTY (steps=[], notes=[], chords=[]) if the style demands it
+- Use minimal elements for sparse/ambient styles
+- Go dense and complex for energetic styles
+- Experiment with different keys (C minor, A minor, D minor, F minor)
+- Try different time feels (straight, swing, triplets)
+- Match the mood authentically (dark, bright, melancholic, energetic, mysterious)
 
-Style-specific sound suggestions:
-- House: kick="909", snare="white", hat="closed", bass="sawtooth", chord="pad"
-- Trap: kick="808", snare="clap", hat="open", bass="sine", chord="pluck"
-- Boom-bap: kick="acoustic", snare="pink", hat="closed", bass="square", chord="pad"
+Available Tracks (use as needed):
+1. kick: type="drum", soundType="808"/"909"/"acoustic", steps=[...]
+2. snare: type="drum", soundType="white"/"pink"/"clap", steps=[...]
+3. hat: type="drum", soundType="closed"/"open", steps=[...]
+4. bass: type="mono", soundType="square"/"sawtooth"/"sine"/"triangle", notes=[{step, pitch, len}]
+5. chord: type="poly", soundType="pad"/"pluck", chords=[{step, name, notes, len}]
 
-Chord progressions in C minor:
-- Common chords: Cm, Fm, G7, Ab, Eb, Bb
-- Chord notes: Cm=[C3,Eb3,G3], Fm=[F3,Ab3,C4], G7=[G3,B3,D4,F4], Ab=[Ab3,C4,Eb4], Eb=[Eb3,G3,Bb3], Bb=[Bb3,D4,F4]
-- Use 2-4 chords per pattern
-- Chord lengths: 2n, 1m, or 4n
+Genre-specific suggestions:
+- House: 909 kick on every beat, white snare, closed hats, sawtooth bass, pad chords
+- Trap: 808 kick (sparse), clap snare, rapid open hats, sine bass, pluck chords
+- Boom-bap: Acoustic kick, pink snare on 2&4, steady closed hats, square bass
+- Techno: Punchy 909 kick, minimal snare, driving closed hats, sine bass, sparse chords
+- Drum & Bass: Fast (170+ BPM), complex breaks, reese bass, atmospheric pads
+- Lo-fi: Sparse acoustic kick, soft pink snare, subtle hats, warm triangle bass, jazzy chords
+- Ambient: Minimal/no drums, focus on lush pad chords and subtle bass
+- Dubstep: Heavy 808 kick (half-time), aggressive clap, minimal hats, deep sine bass
+- Breakbeat: Syncopated breaks, varied snare patterns, complex hat rhythms
 
-Guidelines:
-- Vary the steps (1-16) for ${style} groove
-- Bass notes: C minor scale (C2, D2, Eb2, F2, G2, Ab2, Bb2)
-- Note lengths: 8n, 16n, or 4n
-- Choose soundType based on style and musicality
-- Create harmonic progressions that complement the bass
-- Be creative and make each generation different!`
+Chord vocabulary (any key):
+- C minor: Cm, Fm, G7, Ab, Eb, Bb, Ddim
+- A minor: Am, Dm, E7, F, C, G, Bdim
+- D minor: Dm, Gm, A7, Bb, F, C
+Use 0-4 chords per pattern depending on style
+
+Bass notes: Choose from the minor scale of your key
+Rhythms: Vary steps (1-16) to create unique grooves
+BE DIVERSE - make each generation sound different!`
                                 }
                             ],
-                            temperature: 1.0,
+                            temperature: 1.2,
                             response_format: {
                                 type: "json_schema",
                                 json_schema: {

@@ -331,7 +331,16 @@
                         <option value="ambient">Ambient</option>
                         <option value="dubstep">Dubstep</option>
                         <option value="breakbeat">Breakbeat</option>
+                        <option value="waltz">Waltz (3/4)</option>
                         <option value="custom">Custom</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Time Signature</label>
+                    <select id="time-signature">
+                        <option value="4/4" selected>4/4 (Standard)</option>
+                        <option value="3/4">3/4 (Waltz)</option>
                     </select>
                 </div>
 
@@ -488,6 +497,8 @@
         let recorder = null;
         let isRecording = false;
         let sequence = null;
+        let currentStepCount = 16;  // Current number of steps (16 for 4/4, 12 for 3/4)
+        let currentTimeSignature = "4/4";  // Current time signature
 
         // ============================================================
         // Presets
@@ -495,7 +506,7 @@
         const PRESETS = {
             house: {
                 version: "pattern-v1",
-                meta: { style: "house", bpm: 124, swing: 0.55, scale: "C minor" },
+                meta: { style: "house", timeSignature: "4/4", bpm: 124, swing: 0.55, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "909", steps: [1, 5, 9, 13] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [5, 13] },
@@ -511,7 +522,7 @@
             },
             "boom-bap": {
                 version: "pattern-v1",
-                meta: { style: "boom-bap", bpm: 90, swing: 0.58, scale: "C minor" },
+                meta: { style: "boom-bap", timeSignature: "4/4", bpm: 90, swing: 0.58, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [1, 11] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "pink", steps: [5, 13] },
@@ -526,7 +537,7 @@
             },
             trap: {
                 version: "pattern-v1",
-                meta: { style: "trap", bpm: 140, swing: 0.54, scale: "C minor" },
+                meta: { style: "trap", timeSignature: "4/4", bpm: 140, swing: 0.54, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "808", steps: [1, 9] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "clap", steps: [5, 13] },
@@ -544,7 +555,7 @@
             },
             techno: {
                 version: "pattern-v1",
-                meta: { style: "techno", bpm: 130, swing: 0, scale: "C minor" },
+                meta: { style: "techno", timeSignature: "4/4", bpm: 130, swing: 0, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "909", steps: [1, 5, 9, 13] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [] },
@@ -557,7 +568,7 @@
             },
             dnb: {
                 version: "pattern-v1",
-                meta: { style: "dnb", bpm: 174, swing: 0, scale: "C minor" },
+                meta: { style: "dnb", timeSignature: "4/4", bpm: 174, swing: 0, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "909", steps: [1, 9] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [5, 13] },
@@ -572,7 +583,7 @@
             },
             lofi: {
                 version: "pattern-v1",
-                meta: { style: "lofi", bpm: 75, swing: 0.60, scale: "C minor" },
+                meta: { style: "lofi", timeSignature: "4/4", bpm: 75, swing: 0.60, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [1, 13] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "pink", steps: [5] },
@@ -587,7 +598,7 @@
             },
             ambient: {
                 version: "pattern-v1",
-                meta: { style: "ambient", bpm: 60, swing: 0, scale: "C minor" },
+                meta: { style: "ambient", timeSignature: "4/4", bpm: 60, swing: 0, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "white", steps: [] },
@@ -602,7 +613,7 @@
             },
             dubstep: {
                 version: "pattern-v1",
-                meta: { style: "dubstep", bpm: 140, swing: 0, scale: "C minor" },
+                meta: { style: "dubstep", timeSignature: "4/4", bpm: 140, swing: 0, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "808", steps: [1, 9] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "clap", steps: [5, 13] },
@@ -616,7 +627,7 @@
             },
             breakbeat: {
                 version: "pattern-v1",
-                meta: { style: "breakbeat", bpm: 135, swing: 0.60, scale: "C minor" },
+                meta: { style: "breakbeat", timeSignature: "4/4", bpm: 135, swing: 0.60, scale: "C minor" },
                 tracks: [
                     { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [1, 7, 11] },
                     { id: "snare", type: "drum", sound: "snare-01", soundType: "pink", steps: [5, 13, 15] },
@@ -626,6 +637,24 @@
                         { step: 7, pitch: "Eb2", len: "16n" }
                     ]},
                     { id: "chord", type: "poly", synth: "pad", soundType: "pad", chords: [] }
+                ]
+            },
+            waltz: {
+                version: "pattern-v1",
+                meta: { style: "waltz", timeSignature: "3/4", bpm: 120, swing: 0.50, scale: "C minor" },
+                tracks: [
+                    { id: "kick", type: "drum", sound: "kick-01", soundType: "acoustic", steps: [1] },
+                    { id: "snare", type: "drum", sound: "snare-01", soundType: "pink", steps: [5, 9] },
+                    { id: "hat", type: "drum", sound: "hat-closed-01", soundType: "closed", steps: [5, 9] },
+                    { id: "bass", type: "mono", synth: "square", soundType: "triangle", notes: [
+                        { step: 1, pitch: "C2", len: "4n" },
+                        { step: 5, pitch: "Eb2", len: "4n" },
+                        { step: 9, pitch: "G2", len: "4n" }
+                    ]},
+                    { id: "chord", type: "poly", synth: "pad", soundType: "strings", chords: [
+                        { step: 1, name: "Cm", notes: ["C3", "Eb3", "G3"], len: "2n" },
+                        { step: 7, name: "Fm", notes: ["F3", "Ab3", "C4"], len: "2n" }
+                    ]}
                 ]
             }
         };
@@ -648,6 +677,7 @@
 
             // Event listeners
             document.getElementById("style").addEventListener("change", handleStyleChange);
+            document.getElementById("time-signature").addEventListener("change", handleTimeSignatureChange);
             document.getElementById("bpm").addEventListener("input", handleBPMChange);
             document.getElementById("swing").addEventListener("input", handleSwingChange);
             document.getElementById("generate-btn").addEventListener("click", generateWithOpenAI);
@@ -686,12 +716,72 @@
         }
 
         // ============================================================
+        // Time Signature & Step Management
+        // ============================================================
+        function getStepCountFromTimeSignature(timeSig) {
+            // 3/4 waltz: 3 beats × 4 steps/beat = 12 steps
+            // 4/4 standard: 4 beats × 4 steps/beat = 16 steps
+            return timeSig === "3/4" ? 12 : 16;
+        }
+
+        function rebuildSteps(stepCount) {
+            // Update current step count
+            currentStepCount = stepCount;
+
+            // Rebuild step UI for all tracks
+            ["kick", "snare", "hat", "bass", "chord"].forEach(trackId => {
+                const container = document.getElementById(`${trackId}-steps`);
+
+                // Clear existing steps
+                container.innerHTML = "";
+
+                // Create new steps
+                for (let i = 1; i <= stepCount; i++) {
+                    const step = document.createElement("div");
+                    step.className = "step";
+                    step.dataset.step = i;
+                    step.addEventListener("click", () => toggleStep(trackId, i));
+                    container.appendChild(step);
+                }
+            });
+
+            // If there's a current pattern, reapply it to the new grid
+            if (currentPattern) {
+                loadPattern(currentPattern);
+            }
+        }
+
+        function handleTimeSignatureChange(e) {
+            const timeSig = e.target.value;
+            currentTimeSignature = timeSig;
+            const stepCount = getStepCountFromTimeSignature(timeSig);
+            rebuildSteps(stepCount);
+
+            // Update pattern meta if exists
+            if (currentPattern) {
+                currentPattern.meta.timeSignature = timeSig;
+            }
+        }
+
+        // ============================================================
         // Pattern Management
         // ============================================================
         function loadPattern(pattern) {
             currentPattern = pattern;
 
+            // Check if time signature changed and rebuild UI if needed
+            const patternTimeSignature = pattern.meta.timeSignature || "4/4";
+            const patternStepCount = getStepCountFromTimeSignature(patternTimeSignature);
+
+            if (patternStepCount !== currentStepCount) {
+                currentTimeSignature = patternTimeSignature;
+                rebuildSteps(patternStepCount);
+                // rebuildSteps will call loadPattern again, so return to avoid double-loading
+                return;
+            }
+
             // Update UI controls
+            document.getElementById("time-signature").value = patternTimeSignature;
             document.getElementById("bpm").value = pattern.meta.bpm;
             document.getElementById("swing").value = pattern.meta.swing;
             document.getElementById("swing-value").textContent = pattern.meta.swing;
@@ -1113,7 +1203,7 @@
                             }
                         }
                     });
-                }, Array.from({ length: 16 }, (_, i) => i + 1), "16n");
+                }, Array.from({ length: currentStepCount }, (_, i) => i + 1), "16n");
 
                 // Apply swing
                 sequence.playbackRate = swing < 0.55 ? 1 : 1 + (swing - 0.55) * 2;
@@ -1190,6 +1280,7 @@
             }
 
             const style = document.getElementById("style").value;
+            const timeSignature = document.getElementById("time-signature").value;
             const bpm = document.getElementById("bpm").value;
             const swing = document.getElementById("swing").value;
             const customPrompt = document.getElementById("custom-prompt").value.trim();
@@ -1229,7 +1320,22 @@
                                 },
                                 {
                                     role: "user",
-                                    content: `Create a ${style} beat pattern at ${bpm} BPM with ${swing} swing.${customPrompt ? `\n\n🎨 SPECIAL USER REQUEST: ${customPrompt}` : ''}
+                                    content: `Create a ${style} beat pattern in ${timeSignature} time signature at ${bpm} BPM with ${swing} swing.${customPrompt ? `\n\n🎨 SPECIAL USER REQUEST: ${customPrompt}` : ''}
+
+⏱️ TIME SIGNATURE: ${timeSignature}
+${timeSignature === "3/4" ? `- This is a WALTZ (3/4 time): Use 12 steps total (3 beats × 4 steps per beat)
+- Step numbers: 1-12 (NOT 1-16!)
+- Beat 1: steps 1-4 (STRONG downbeat - emphasize kick/bass here)
+- Beat 2: steps 5-8 (medium)
+- Beat 3: steps 9-12 (weak)
+- Waltz characteristics:
+  * Kick on step 1 (downbeat), often with snare/hat on steps 5, 9 for "oom-pah-pah" feel
+  * Bass notes typically on steps 1, 5, 9 (one per beat)
+  * Chords sustain across beats, create flowing/dancing feel
+  * Avoid dense hi-hat patterns - keep it open and breathing
+  * Use softer sounds (acoustic kick, triangle bass, ep/strings chords) for authentic waltz feel` :
+`- This is STANDARD 4/4 time: Use 16 steps total (4 beats × 4 steps per beat)
+- Step numbers: 1-16`}
 
 ⚡ ENABLED TRACKS: ${enabledList}
 ${enabledList !== "kick, snare, hat, bass, chord" ? "Focus on the enabled tracks only. Leave disabled tracks MINIMAL (empty arrays)." : ""}
@@ -1335,6 +1441,7 @@ Genre-specific sound suggestions (with swing values):
 - Ambient: Minimal drums, sine bass, pad/strings chords (focus on harmony), swing: 0-0.50
 - Dubstep: 808 kick, clap, minimal hats, sine bass (deep), pluck/pad, swing: 0-0.52
 - Breakbeat: Acoustic kick, pink snare, complex hats, filtered bass, organ/ep, swing: 0.60
+- Waltz (3/4): Acoustic kick (step 1 only), pink snare (steps 5,9), minimal hats, triangle bass, strings/ep chords, swing: 0.50, 12 steps total
 
 Chord vocabulary (any key):
 - C minor: Cm, Fm, G7, Ab, Eb, Bb, Ddim
@@ -1343,7 +1450,8 @@ Chord vocabulary (any key):
 Use 0-4 chords per pattern depending on style
 
 Bass notes: Choose from the minor scale of your key
-Rhythms: Vary steps (1-16) to create unique grooves
+Rhythms: Vary steps to create unique grooves
+${timeSignature === "3/4" ? "REMEMBER: Use steps 1-12 only (NOT 1-16) for 3/4 waltz!" : "Use steps 1-16 for 4/4 time"}
 BE DIVERSE - make each generation sound different!`
                                 }
                             ],
@@ -1364,11 +1472,12 @@ BE DIVERSE - make each generation sound different!`
                                                 type: "object",
                                                 properties: {
                                                     style: { type: "string" },
+                                                    timeSignature: { type: "string" },
                                                     bpm: { type: "number" },
                                                     swing: { type: "number" },
                                                     scale: { type: "string" }
                                                 },
-                                                required: ["style", "bpm", "swing", "scale"],
+                                                required: ["style", "timeSignature", "bpm", "swing", "scale"],
                                                 additionalProperties: false
                                             },
                                             tracks: {

@@ -736,7 +736,8 @@
                                     role: "user",
                                     content: `Create a unique ${style} beat pattern at ${bpm} BPM with ${swing} swing.
 
-IMPORTANT: All tracks must include ALL fields (id, type, sound, synth, steps, notes).
+IMPORTANT: version must be exactly "pattern-v1"
+All tracks must include ALL fields (id, type, sound, synth, steps, notes).
 - For drum tracks (kick, snare, hat): set synth="square", notes=[]
 - For mono tracks (bass): set sound="kick-01", steps=[]
 
@@ -763,7 +764,8 @@ Guidelines:
                                         type: "object",
                                         properties: {
                                             version: {
-                                                type: "string"
+                                                type: "string",
+                                                const: "pattern-v1"
                                             },
                                             meta: {
                                                 type: "object",

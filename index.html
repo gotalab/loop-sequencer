@@ -284,7 +284,7 @@
 <body>
     <header>
         <h1>🎵 1分で曲作り - ループ・シーケンサー</h1>
-        <div class="about">GPT-4o-mini × Tone.js</div>
+        <div class="about">GPT-5-mini × Tone.js</div>
     </header>
 
     <div class="container">
@@ -697,7 +697,7 @@
         }
 
         // ============================================================
-        // OpenAI API Integration (GPT-4o-mini with Structured Outputs)
+        // OpenAI API Integration (GPT-5-mini with Structured Outputs)
         // ============================================================
         async function generateWithOpenAI() {
             const apiKey = document.getElementById("api-key").value.trim();
@@ -712,7 +712,7 @@
             const bpm = document.getElementById("bpm").value;
             const swing = document.getElementById("swing").value;
 
-            setStatus("GPT-4o-miniでパターン生成中...", "");
+            setStatus("GPT-5-miniでパターン生成中...", "");
             document.getElementById("generate-btn").disabled = true;
 
             try {
@@ -726,7 +726,7 @@
                             "Authorization": `Bearer ${apiKey}`
                         },
                         body: JSON.stringify({
-                            model: "gpt-4o-mini",
+                            model: "gpt-5-mini",
                             messages: [
                                 {
                                     role: "system",
@@ -846,7 +846,7 @@ Guidelines:
                 }
 
                 loadPattern(pattern);
-                setStatus("✨ GPT-4o-miniで新しいパターンを生成しました！", "success");
+                setStatus("✨ GPT-5-miniで新しいパターンを生成しました！", "success");
             } catch (error) {
                 console.error("OpenAI generation failed:", error);
                 setStatus(`生成失敗: ${error.message}`, "error");
